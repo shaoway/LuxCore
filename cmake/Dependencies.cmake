@@ -27,28 +27,37 @@ getenv_path(LuxRays_DEPENDENCIES_DIR)
 
 # Find threading library
 find_package(Threads REQUIRED)
-
+find_package(Spdlog REQUIRED)
+find_package(Bzip2 REQUIRED)
+find_package(PugiXml REQUIRED)
+find_package(MiniZipNG REQUIRED)
+find_package(OpenJPEG REQUIRED)
+find_package(Webp REQUIRED)
+find_package(TIFF REQUIRED)
+find_package(Json REQUIRED)
+find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(Blosc REQUIRED)
+find_package(Imath REQUIRED)
+find_package(PythonLibs)
+find_package(glfw3 REQUIRED)
 find_package(OpenImageIO REQUIRED)
-include_directories(BEFORE SYSTEM ${OPENIMAGEIO_INCLUDE_DIR})
 find_package(OpenEXR REQUIRED)
+find_package(OpenGL)
+find_package(TBB REQUIRED)
+find_package(Embree REQUIRED)
+find_package(OpenColorIO REQUIRED)
+find_package(OpenVDB REQUIRED)
+find_package(OpenSubdiv REQUIRED)
+find_package(OpenImageDenoise REQUIRED)
 
-if(NOT APPLE)
-    # Apple has these available hardcoded and matched in macos repo, see Config_OSX.cmake
-
-    include_directories(BEFORE SYSTEM ${OPENEXR_INCLUDE_DIRS})
-    find_package(TIFF REQUIRED)
-    include_directories(BEFORE SYSTEM ${TIFF_INCLUDE_DIR})
-    find_package(JPEG REQUIRED)
-    include_directories(BEFORE SYSTEM ${JPEG_INCLUDE_DIR})
-    find_package(PNG REQUIRED)
-    include_directories(BEFORE SYSTEM ${PNG_PNG_INCLUDE_DIR})
-	# Find Python Libraries
-    if("${PYTHON_V}" EQUAL "27")
-        find_package(PythonLibs 2.7)
-    else()
-        find_package(PythonLibs 3.4)
-    endif()
-endif()
+add_bundled_libraries(openimageio/lib)
+add_bundled_libraries(tbb/lib)
+add_bundled_libraries(embree/lib)
+add_bundled_libraries(opencolorio/lib)
+add_bundled_libraries(openvdb/lib)
+add_bundled_libraries(opensubdiv/lib)
+add_bundled_libraries(openimagedenoise/lib)
 
 find_program(PYSIDE_UIC NAMES pyside-uic pyside2-uic pyside6-uic
 		HINTS "${PYTHON_INCLUDE_DIRS}/../Scripts"
@@ -57,80 +66,26 @@ find_program(PYSIDE_UIC NAMES pyside-uic pyside2-uic pyside6-uic
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 # Find Boost
-set(Boost_USE_STATIC_LIBS       ON)
+set(Boost_USE_STATIC_LIBS       OFF)
 set(Boost_USE_MULTITHREADED     ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-set(BOOST_ROOT                  "${BOOST_SEARCH_PATH}")
-#set(Boost_DEBUG                 ON)
 set(Boost_MINIMUM_VERSION       "1.56.0")
 
 # For Windows builds, PYTHON_V must be defined as "3x" (x=Python minor version, e.g. "35")
 # For other platforms, specifying python minor version is not needed
-set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system python${PYTHON_V} chrono serialization numpy${PYTHON_V})
+set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system chrono serialization)
 find_package(Boost ${Boost_MINIMUM_VERSION} COMPONENTS ${LUXRAYS_BOOST_COMPONENTS})
-if (NOT Boost_FOUND)
-        # Try again with the other type of libs
-        if(Boost_USE_STATIC_LIBS)
-                set(Boost_USE_STATIC_LIBS OFF)
-        else()
-                set(Boost_USE_STATIC_LIBS ON)
-        endif()
-        # The following line is necessary with CMake 3.18.0 to find static libs on Windows
-        unset(Boost_LIB_PREFIX)
-		message(STATUS "Re-trying with link static = ${Boost_USE_STATIC_LIBS}")
-        find_package(Boost ${Boost_MINIMUM_VERSION} COMPONENTS ${LUXRAYS_BOOST_COMPONENTS})
-endif()
 
-if (Boost_FOUND)
-	include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
-	link_directories(${Boost_LIBRARY_DIRS})
-	# Don't use old boost versions interfaces
-	ADD_DEFINITIONS(-DBOOST_FILESYSTEM_NO_DEPRECATED)
-	if (Boost_USE_STATIC_LIBS)
-		ADD_DEFINITIONS(-DBOOST_STATIC_LIB)
-		ADD_DEFINITIONS(-DBOOST_PYTHON_STATIC_LIB)
-	endif()
-endif ()
-
-
-# OpenGL
-find_package(OpenGL)
-
-if (OPENGL_FOUND)
-	include_directories(BEFORE SYSTEM ${OPENGL_INCLUDE_PATH})
-endif ()
-
-# Intel Embree
-set(EMBREE_ROOT                "${EMBREE_SEARCH_PATH}")
-find_package(Embree REQUIRED)
-
-if (EMBREE_FOUND)
-	include_directories(BEFORE SYSTEM ${EMBREE_INCLUDE_PATH})
-endif ()
-
-# Intel Oidn
-set(OIDN_ROOT                "${OIDN_SEARCH_PATH}")
-find_package(Oidn REQUIRED)
-
-if (OIDN_FOUND)
-	include_directories(BEFORE SYSTEM ${OIDN_INCLUDE_PATH})
-endif ()
-
-# Intel TBB
-set(TBB_ROOT                   "${TBB_SEARCH_PATH}")
-find_package(TBB REQUIRED)
-
-if (TBB_FOUND)
-	include_directories(BEFORE SYSTEM ${TBB_INCLUDE_PATH})
-endif ()
-
-# Blosc
-set(BLOSC_ROOT                   "${BLOSC_SEARCH_PATH}")
-find_package(Blosc REQUIRED)
-
-if (BLOSC_FOUND)
-	include_directories(BEFORE SYSTEM ${BLOSC_INCLUDE_PATH})
-endif ()
+set(Boost_LIBRARIES
+  ${Boost_FILESYSTEM_LIBRARY_RELEASE}
+  ${Boost_CHRONO_LIBRARY_RELEASE}
+  ${Boost_IOSTREAMS_LIBRARY_RELEASE}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE}
+  ${Boost_REGEX_LIBRARY_RELEASE}
+  ${Boost_SERIALIZATION_LIBRARY_RELEASE}
+  ${Boost_SYSTEM_LIBRARY_RELEASE}
+  ${Boost_THREAD_LIBRARY_RELEASE}
+)
 
 # OpenMP
 if(NOT APPLE)
@@ -160,3 +115,4 @@ ENDIF (NOT BISON_NOT_AVAILABLE)
 IF (NOT FLEX_NOT_AVAILABLE)
 	find_package(FLEX)
 ENDIF (NOT FLEX_NOT_AVAILABLE)
+

@@ -1,0 +1,38 @@
+
+set(OPENSUBDIV_EXTRA_ARGS
+  -DNO_LIB=OFF
+  -DNO_EXAMPLES=ON
+  -DNO_TUTORIALS=ON
+  -DNO_REGRESSION=ON
+  -DNO_PTEX=ON
+  -DNO_DOC=ON
+  -DNO_OMP=OFF
+  -DNO_TBB=OFF
+  -DNO_CUDA=ON
+  -DNO_OPENCL=ON
+  -DNO_CLEW=ON
+  -DNO_OPENGL=ON
+  -DNO_METAL=ON
+  -DNO_DX=ON
+  -DNO_TESTS=ON
+  -DNO_GLTESTS=ON
+  -DNO_GLEW=ON
+  -DNO_GLFW=ON
+  -DNO_GLFW_X11=ON
+  -DTBB_INCLUDE_DIR=${LIBDIR}/tbb/include
+  -DTBB_tbb_LIBRARY=${LIBDIR}/tbb/lib/libtbb.so
+)
+
+ExternalProject_Add(external_opensubdiv
+  URL file://${PACKAGE_DIR}/${OPENSUBDIV_FILE}
+  DOWNLOAD_DIR ${DOWNLOAD_DIR}
+  URL_HASH ${OPENSUBDIV_HASH_TYPE}=${OPENSUBDIV_HASH}
+  PREFIX ${BUILD_DIR}/opensubdiv
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LIBDIR}/opensubdiv -Wno-dev ${DEFAULT_CMAKE_FLAGS} ${OPENSUBDIV_EXTRA_ARGS}
+  INSTALL_DIR ${LIBDIR}/opensubdiv
+)
+
+add_dependencies(
+  external_opensubdiv
+  external_tbb
+)

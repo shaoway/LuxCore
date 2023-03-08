@@ -23,13 +23,22 @@
 #############################################################################
 
 set(LUXCORECONSOLE_SRCS
-	luxcoreconsole.cpp
-	)
+  luxcoreconsole.cpp
+)
 
 add_executable(luxcoreconsole ${LUXCORECONSOLE_SRCS})
+target_include_directories(luxcoreconsole
+  PUBLIC
+  ${Boost_INCLUDE_DIRS}
+)
 
 if(APPLE)
-TARGET_LINK_LIBRARIES(luxcoreconsole expat "-framework Carbon" "-framework IOKit" ${LUXCORE_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(luxcoreconsole expat "-framework Carbon" "-framework IOKit" ${LUXCORE_LIBRARY} ${Boost_LIBRARIES})
 else()
-TARGET_LINK_LIBRARIES(luxcoreconsole ${LUXCORE_LIBRARY} ${Boost_LIBRARIES})
+  target_link_libraries(luxcoreconsole
+    PRIVATE
+    ${LUXCORE_LIBRARY}
+    ${Boost_LIBRARIES}
+    bz2 deflate fmt
+  )
 endif()

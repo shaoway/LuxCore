@@ -16,7 +16,13 @@
 # limitations under the License.
 ################################################################################
 
-MESSAGE(STATUS "CMake version " ${CMAKE_VERSION} " detected")
+
+# Don't allow in-source builds.
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR
+      "LuxCoreRender is not allowed build within the source directory!\n"
+    )
+endif()
 
 
 ################################################################################
@@ -25,44 +31,40 @@ MESSAGE(STATUS "CMake version " ${CMAKE_VERSION} " detected")
 #
 ################################################################################
 
-cmake_minimum_required(VERSION 3.5.1)
-cmake_policy(VERSION 3.0)
+cmake_minimum_required(VERSION 3.20)
 
-# Remove the following when the version check is at least 2.8.4
-SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
+# So library linking is more sane
+cmake_policy(SET CMP0003 NEW)
 
-set(supported_build_variants "Debug" "Release")
+# So BUILDINFO strings are automatically quoted
+cmake_policy(SET CMP0005 NEW)
 
-# Detect whether we're using a single config or multi config generator and
-# configure it:
+# So syntax problems are errors
+cmake_policy(SET CMP0010 NEW)
 
-unset(CMAKE_CONFIGURATION_TYPES CACHE)
+# Input directories must have CMakeLists.txt
+cmake_policy(SET CMP0014 NEW)
+
+if(POLICY CMP0072)
+  cmake_policy(SET CMP0072 NEW) # for OpenGL GLVND
+endif()
+
+# find_package() uses <PackageName>_ROOT variables.
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
+# Install CODE|SCRIPT allow the use of generator expressions.
+if(POLICY CMP0087)
+  cmake_policy(SET CMP0087 NEW)
+endif()
 
 # This boots up the generator:
 enable_language(C)
 enable_language(CXX)
 
-if (CMAKE_CONFIGURATION_TYPES)
-
-	message(STATUS "Multi-config generator detected")
-
-	# Hard-wire supported configurations:
-
-	set(CMAKE_CONFIGURATION_TYPES
-			${supported_build_variants} CACHE INTERNAL "-" FORCE)
-else()
-	message(STATUS "Single-config generator detected")
-
-	# For generators like make, cmake needs to know which variant to use
-	# so let's have a drop-down selector for it in the GUI:
-
-	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build configuration")
-	set_property(
-			CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${supported_build_variants})
-
-	message(STATUS "Using build variant: " ${CMAKE_BUILD_TYPE})
-
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # The following implicitly boots up the generator, so don't move it up:
 
@@ -84,55 +86,29 @@ set(CMAKE_MODULE_PATH
 	"${LuxRays_SOURCE_DIR}/cmake/Utils"
 	"${LuxRays_SOURCE_DIR}/cmake/Packages"
 	"${LuxRays_SOURCE_DIR}/cmake/SpecializedConfig"
-)
+      )
 
-INCLUDE(PlatformSpecific)
-INCLUDE(Configuration)
-INCLUDE(KernelPreprocess)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+include(PlatformSpecific)
+include(Configuration)
+include(KernelPreprocess)
 
 # Install CMake modules
 #add_subdirectory(CMake)
 
-SET(LuxRays_INCLUDE_DIR "${LuxRays_SOURCE_DIR}/include")
+set(LuxRays_INCLUDE_DIR "${LuxRays_SOURCE_DIR}/include")
 include_directories("${LuxRays_INCLUDE_DIR}")
 
-include_directories("${LuxRays_SOURCE_DIR}/deps/json-3.7.3/include")
 include_directories("${LuxRays_SOURCE_DIR}/deps/cuew/include")
 include_directories("${LuxRays_SOURCE_DIR}/deps/clew/include")
 include_directories("${LuxRays_SOURCE_DIR}/deps/optix-7.1.0/include")
-include_directories("${LuxRays_SOURCE_DIR}/deps/spdlog-1.8.0/include")
 include_directories("${LuxRays_SOURCE_DIR}/deps/robin-hood-hashing-3.9.1/src/include")
 
 # Find dependencies
 include(Dependencies)
-
-if (NOT Boost_FOUND)
-	MESSAGE(FATAL_ERROR "--> Could not locate required Boost files - Please check ${BOOST_SEARCH_PATH}")
-endif()
-
-if (NOT OPENIMAGEIO_FOUND)
-	MESSAGE(FATAL_ERROR "--> Could not locate required OpenImageIO files - Please check ${OPENIMAGEIO_SEARCH_PATH}")
-endif()
-
-if (NOT OPENGL_FOUND)
-	MESSAGE(FATAL_ERROR "--> Could not locate required OpenGL file")
-endif()
-
-if (NOT EMBREE_FOUND)
-	MESSAGE(FATAL_ERROR "--> Could not locate required Intel Embree files - Please check ${EMBREE_SEARCH_PATH}")
-endif()
-
-if (NOT OIDN_FOUND AND NOT LUXCORE_DISABLE_OIDN)
-	MESSAGE(FATAL_ERROR "--> Could not locate required Intel Oidn files - Please check ${OIDN_SEARCH_PATH}")
-endif()
-
-if (NOT TBB_FOUND)
-	MESSAGE(FATAL_ERROR "--> Could not locate required Intel TBB files - Please check ${TBB_SEARCH_PATH}")
-endif()
-
-if (NOT BLOSC_FOUND)
-	MESSAGE(FATAL_ERROR "--> Could not locate required C-BLOSC files - Please check ${BLOSC_SEARCH_PATH}")
-endif()
 
 ################################################################################
 #
@@ -169,7 +145,13 @@ if (BUILD_LUXCORE_DLL)
 	set(LUXCORE_LIBRARY luxcore)
 	ADD_DEFINITIONS("-DLUXCORE_DLL")
 else()
-	set(LUXCORE_LIBRARY luxcore slg-core slg-film slg-kernels luxrays bcd opensubdiv openvdb opencolorio ${BLOSC_LIBRARY} ${EMBREE_LIBRARY} ${OIDN_LIBRARY} ${TBB_LIBRARY} ${TIFF_LIBRARIES} ${TIFF_LIBRARIES} ${OPENEXR_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES})
+  set(LUXCORE_LIBRARY luxcore slg-core slg-film slg-kernels luxrays bcd
+    ${OPENSUBDIV_OSDCPU_LIBRARY} ${OPENVDB_LIBRARIES} ${OPENCOLORIO_OPENCOLORIO_LIBRARY}
+    ${OPENIMAGEIO_LIBRARIES} ${OPENIMAGEIO_UTIL_LIBRARIES}
+    ${BLOSC_LIBRARIES} ${EMBREE_LIBRARIES}
+    ${OIDN_LIBRARIES}
+    ${TBB_LIBRARIES} ${TIFF_LIBRARIES} ${OPENEXR_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARIES}
+  )
 endif()
 
 ################################################################################
@@ -228,4 +210,4 @@ add_subdirectory(pyunittests)
 #
 ################################################################################
 
-INCLUDE(AssembleBinDirs)
+include(AssembleBinDirs)

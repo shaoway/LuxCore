@@ -38,7 +38,7 @@ void slg::Init() {
 	openvdb::initialize();
 	
 	// Workaround to a bug: https://github.com/OpenImageIO/oiio/issues/1795
-	OIIO::attribute ("threads", 1);
+	// OIIO::attribute ("threads", 1);
 	
 	SLG_FileNameResolver.Clear();
 }

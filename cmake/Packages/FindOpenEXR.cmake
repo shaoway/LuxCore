@@ -1,123 +1,209 @@
-################################################################################
-# Copyright 1998-2020 by authors (see AUTHORS.txt)
-#
-#   This file is part of LuxCoreRender.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-################################################################################
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright 2011 Blender Foundation.
 
-# - Try to find OpenEXR
-# Library is first searched for in OPENEXR_ROOT
-# Once done, this will define
+# - Find OpenEXR library
+# Find the native OpenEXR includes and library
+# This module defines
+#  OPENEXR_INCLUDE_DIRS, where to find ImfXdr.h, etc. Set when
+#                        OPENEXR_INCLUDE_DIR is found.
+#  OPENEXR_LIBRARIES, libraries to link against to use OpenEXR.
+#  OPENEXR_ROOT, The base directory to search for OpenEXR.
+#                    This can also be an environment variable.
+#  OPENEXR_FOUND, If false, do not try to use OpenEXR.
 #
-#  OPENEXR_FOUND - system has OpenEXR
-#  OPENEXR_INCLUDE_DIRS - the OpenEXR include directories
-#  OPENEXR_LIBRARIES - link these to use OpenEXR
+# For individual library access these advanced settings are available
+#  OPENEXR_HALF_LIBRARY, Path to Half library
+#  OPENEXR_IEX_LIBRARY, Path to Half library
+#  OPENEXR_ILMIMF_LIBRARY, Path to Ilmimf library
+#  OPENEXR_ILMTHREAD_LIBRARY, Path to IlmThread library
+#  OPENEXR_IMATH_LIBRARY, Path to Imath library
+#
+# also defined, but not for general use are
+#  OPENEXR_LIBRARY, where to find the OpenEXR library.
 
-# Lookup user specified path first
-SET(OpenEXR_TEST_HEADERS ImfXdr.h OpenEXRConfig.h IlmBaseConfig.h)
-SET(OpenEXR_INC_SUFFIXES include/OpenEXR include Include Headers)
-FIND_PATH(OPENEXR_INCLUDE_DIRS
-	NAMES ${OpenEXR_TEST_HEADERS}
-	PATHS "${OPENEXR_ROOT}"
-	PATH_SUFFIXES ${OpenEXR_INC_SUFFIXES}
-	NO_DEFAULT_PATH
-	DOC "The directory where IlmBaseConfig.h resides"
-)
-FIND_PATH(OPENEXR_INCLUDE_DIRS
-	NAMES ${OpenEXR_TEST_HEADERS}
-	PATHS /usr/local /usr /sw /opt/local /opt/csw /opt
-	PATH_SUFFIXES ${OpenEXR_INC_SUFFIXES}
-	DOC "The directory where IlmBaseConfig.h resides"
+# If OPENEXR_ROOT was defined in the environment, use it.
+IF(NOT OPENEXR_ROOT AND NOT $ENV{OPENEXR_ROOT} STREQUAL "")
+  SET(OPENEXR_ROOT $ENV{OPENEXR_ROOT})
+ENDIF()
+
+# Old versions (before 2.0?) do not have any version string,
+# just assuming this should be fine though.
+SET(_openexr_libs_ver_init "2.0")
+
+SET(_openexr_SEARCH_DIRS
+  ${OPENEXR_ROOT}
+  /opt/lib/openexr
 )
 
-IF (OPENEXR_INCLUDE_DIRS)
-# Lookup additional headers in case they are in subdirectories
-SET(OpenEXR_MODULES Iex Imf half Imath IlmThread)
-FOREACH(i ${OpenEXR_MODULES})
-	FIND_PATH(OpenEXR_${i}_INCLUDE_DIR
-		NAMES ${i}.h ${i}Header.h ${i}Math.h
-		PATHS "${OPENEXR_INCLUDE_DIRS}" "${OPENEXR_INCLUDE_DIRS}/${i}" "${OPENEXR_INCLUDE_DIRS}/Ilm${i}"
-		NO_DEFAULT_PATH
-		DOC "The directory where ${i}.h resides"
-	)
-ENDFOREACH(i)
-FOREACH(i ${OpenEXR_MODULES})
-	IF (NOT OpenEXR_${i}_INCLUDE_DIR)
-		SET(OpenEXR_${i}_INCLUDE_DIR "")
-	ENDIF (NOT OpenEXR_${i}_INCLUDE_DIR)
-	IF ("${OpenEXR_${i}_INCLUDE_DIR}" STREQUAL "${OPENEXR_INCLUDE_DIRS}")
-		SET(OpenEXR_${i}_INCLUDE_DIR "")
-	ENDIF ("${OpenEXR_${i}_INCLUDE_DIR}" STREQUAL "${OPENEXR_INCLUDE_DIRS}")
-ENDFOREACH(i)
-FOREACH(i ${OpenEXR_MODULES})
-	SET(OPENEXR_INCLUDE_DIRS ${OPENEXR_INCLUDE_DIRS} ${OpenEXR_${i}_INCLUDE_DIR})
-ENDFOREACH(i)
-ENDIF(OPENEXR_INCLUDE_DIRS)
+FIND_PATH(OPENEXR_INCLUDE_DIR
+  NAMES
+    OpenEXR/ImfXdr.h
+  HINTS
+    ${_openexr_SEARCH_DIRS}
+  PATH_SUFFIXES
+    include
+)
 
-SET(OpenEXR_LIBRARY_MODULES Iex IlmImf Half Imath IlmThread)
-SET(OpenEXR_LIB_SUFFIXES lib64 lib Lib lib/OpenEXR Libs x64/Release/lib)
-SET(OpenEXR_LIB_SUFFIXES_REL)
-SET(OpenEXR_LIB_SUFFIXES_DBG)
-FOREACH(i ${OpenEXR_LIB_SUFFIXES})
-	SET(OpenEXR_LIB_SUFFIXES_REL ${OpenEXR_LIB_SUFFIXES_REL}
-		"${i}" "${i}/release" "${i}/relwithdebinfo" "${i}/minsizerel" "${i}/dist")
-	SET(OpenEXR_LIB_SUFFIXES_DBG ${OpenEXR_LIB_SUFFIXES_DBG}
-		"${i}" "${i}/debug" "${i}/dist")
-ENDFOREACH(i)
-SET(OPENEXR_LIBRARIES)
-FOREACH(i ${OpenEXR_LIBRARY_MODULES})
-	FIND_LIBRARY(OpenEXR_${i}_LIBRARY_REL
-		NAMES ${i}
-		PATHS "${OPENEXR_ROOT}"
-		PATH_SUFFIXES ${OpenEXR_LIB_SUFFIXES_REL}
-		NO_DEFAULT_PATH
-		DOC "The ${i} release library"
-	)
-	FIND_LIBRARY(OpenEXR_${i}_LIBRARY_REL
-		NAMES ${i}
-		PATHS /usr/local /usr /sw /opt/local /opt/csw /opt
-		PATH_SUFFIXES ${OpenEXR_LIB_SUFFIXES_REL}
-		DOC "The ${i} release library"
-	)
-	FIND_LIBRARY(OpenEXR_${i}_LIBRARY_DBG
-		NAMES "${i}d" "${i}D" "${i}_d" "${i}_D" "${i}_debug"
-		PATHS "${OPENEXR_ROOT}"
-		PATH_SUFFIXES ${OpenEXR_LIB_SUFFIXES_DBG}
-		NO_DEFAULT_PATH
-		DOC "The ${i} debug library"
-	)
-	FIND_LIBRARY(OpenEXR_${i}_LIBRARY_DBG
-		NAMES "${i}d" "${i}D" "${i}_d" "${i}_D" "${i}_debug"
-		PATHS /usr/local /usr /sw /opt/local /opt/csw /opt
-		PATH_SUFFIXES ${OpenEXR_LIB_SUFFIXES_DBG}
-		DOC "The ${i} debug library"
-	)
-	IF (OpenEXR_${i}_LIBRARY_REL AND OpenEXR_${i}_LIBRARY_DBG)
-		SET(OPENEXR_LIBRARIES ${OPENEXR_LIBRARIES}
-			optimized ${OpenEXR_${i}_LIBRARY_REL}
-			debug ${OpenEXR_${i}_LIBRARY_DBG})
-	ELSEIF (OpenEXR_${i}_LIBRARY_REL)
-		SET(OPENEXR_LIBRARIES ${OPENEXR_LIBRARIES}
-			${OpenEXR_${i}_LIBRARY_REL})
-	ELSEIF (OpenEXR_${i}_LIBRARY_DBG)
-		SET(OPENEXR_LIBRARIES ${OPENEXR_LIBRARIES}
-			${OpenEXR_${i}_LIBRARY_DBG})
-	ENDIF (OpenEXR_${i}_LIBRARY_REL AND OpenEXR_${i}_LIBRARY_DBG)
-ENDFOREACH (i)
+# If the headers were found, get the version from config file, if not already set.
+IF(OPENEXR_INCLUDE_DIR)
+  IF(NOT OPENEXR_VERSION)
 
+    FIND_FILE(_openexr_CONFIG
+      NAMES
+        OpenEXRConfig.h
+      PATHS
+        "${OPENEXR_INCLUDE_DIR}"
+        "${OPENEXR_INCLUDE_DIR}/OpenEXR"
+      NO_DEFAULT_PATH
+    )
+
+    IF(_openexr_CONFIG)
+      FILE(STRINGS "${_openexr_CONFIG}" OPENEXR_BUILD_SPECIFICATION
+           REGEX "^[ \t]*#define[ \t]+OPENEXR_VERSION_STRING[ \t]+\"[.0-9]+\".*$")
+    ELSE()
+      MESSAGE(WARNING "Could not find \"OpenEXRConfig.h\" in \"${OPENEXR_INCLUDE_DIR}\"")
+    ENDIF()
+
+    IF(OPENEXR_BUILD_SPECIFICATION)
+      MESSAGE(STATUS "${OPENEXR_BUILD_SPECIFICATION}")
+      STRING(REGEX REPLACE ".*#define[ \t]+OPENEXR_VERSION_STRING[ \t]+\"([.0-9]+)\".*"
+             "\\1" _openexr_libs_ver_init ${OPENEXR_BUILD_SPECIFICATION})
+    ELSE()
+      MESSAGE(WARNING "Could not determine ILMBase library version, assuming ${_openexr_libs_ver_init}.")
+    ENDIF()
+
+    UNSET(_openexr_CONFIG CACHE)
+
+  ENDIF()
+ENDIF()
+
+SET("OPENEXR_VERSION" ${_openexr_libs_ver_init} CACHE STRING "Version of OpenEXR lib")
+UNSET(_openexr_libs_ver_init)
+
+STRING(REGEX REPLACE "([0-9]+)[.]([0-9]+).*" "\\1_\\2" _openexr_libs_ver ${OPENEXR_VERSION})
+
+# Different library names in 3.0, and Imath and Half moved out.
+IF(OPENEXR_VERSION VERSION_GREATER_EQUAL "3.0.0")
+  SET(_openexr_FIND_COMPONENTS
+    OpenEXR
+    OpenEXRCore
+    Iex
+    IlmThread
+  )
+ELSE()
+  SET(_openexr_FIND_COMPONENTS
+    Half
+    Iex
+    IlmImf
+    IlmThread
+    Imath
+  )
+ENDIF()
+
+SET(_openexr_LIBRARIES)
+FOREACH(COMPONENT ${_openexr_FIND_COMPONENTS})
+  STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+
+  FIND_LIBRARY(OPENEXR_${UPPERCOMPONENT}_LIBRARY
+    NAMES
+      ${COMPONENT}-${_openexr_libs_ver} ${COMPONENT}
+    NAMES_PER_DIR
+    HINTS
+      ${_openexr_SEARCH_DIRS}
+    PATH_SUFFIXES
+      lib64 lib
+    )
+  LIST(APPEND _openexr_LIBRARIES "${OPENEXR_${UPPERCOMPONENT}_LIBRARY}")
+ENDFOREACH()
+
+UNSET(_openexr_libs_ver)
+
+IF(OPENEXR_VERSION VERSION_GREATER_EQUAL "3.0.0")
+  # For OpenEXR 3.x, we also need to find the now separate Imath library.
+  # For simplicity we add it to the OpenEXR includes and libraries, as we
+  # have no direct dependency on Imath and it's simpler to support both
+  # 2.x and 3.x this way.
+
+  # Find include directory
+  FIND_PATH(IMATH_INCLUDE_DIR
+    NAMES
+      Imath/ImathMath.h
+    HINTS
+      ${_openexr_SEARCH_DIRS}
+    PATH_SUFFIXES
+      include
+  )
+
+  # Find version
+  FIND_FILE(_imath_config
+    NAMES
+      ImathConfig.h
+    PATHS
+      ${IMATH_INCLUDE_DIR}/Imath
+    NO_DEFAULT_PATH
+  )
+
+  # Find line with version, extract string, and format for library suffix.
+  FILE(STRINGS "${_imath_config}" _imath_build_specification
+       REGEX "^[ \t]*#define[ \t]+IMATH_VERSION_STRING[ \t]+\"[.0-9]+\".*$")
+  STRING(REGEX REPLACE ".*#define[ \t]+IMATH_VERSION_STRING[ \t]+\"([.0-9]+)\".*"
+         "\\1" _imath_libs_ver ${_imath_build_specification})
+  STRING(REGEX REPLACE "([0-9]+)[.]([0-9]+).*" "\\1_\\2" _imath_libs_ver ${_imath_libs_ver})
+
+  # Find library, with or without version number.
+  FIND_LIBRARY(IMATH_LIBRARY
+    NAMES
+      Imath-${_imath_libs_ver} Imath
+    NAMES_PER_DIR
+    HINTS
+      ${_openexr_SEARCH_DIRS}
+    PATH_SUFFIXES
+      lib64 lib
+    )
+  LIST(APPEND _openexr_LIBRARIES "${IMATH_LIBRARY}")
+
+  # In cmake version 3.21 and up, we can instead use the NO_CACHE option for
+  # FIND_FILE so we don't need to clear it from the cache here.
+  UNSET(_imath_config CACHE)
+  UNSET(_imath_libs_ver)
+  UNSET(_imath_build_specification)
+ENDIF()
+
+# handle the QUIETLY and REQUIRED arguments and set OPENEXR_FOUND to TRUE if
+# all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OPENEXR  DEFAULT_MSG  OPENEXR_LIBRARIES OPENEXR_INCLUDE_DIRS)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenEXR DEFAULT_MSG
+    _openexr_LIBRARIES OPENEXR_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(OPENEXR_INCLUDE_DIRS OPENEXR_LIBRARIES)
+IF(OPENEXR_FOUND)
+  SET(OPENEXR_LIBRARIES ${_openexr_LIBRARIES})
+  # Both include paths are needed because of dummy OSL headers mixing
+  # #include <OpenEXR/foo.h> and #include <foo.h>, as well as Alembic
+  # include <half.h> directly.
+  SET(OPENEXR_INCLUDE_DIRS
+    ${OPENEXR_INCLUDE_DIR}
+    ${OPENEXR_INCLUDE_DIR}/OpenEXR)
 
+  IF(OPENEXR_VERSION VERSION_GREATER_EQUAL "3.0.0")
+    LIST(APPEND OPENEXR_INCLUDE_DIRS
+      ${IMATH_INCLUDE_DIR}
+      ${IMATH_INCLUDE_DIR}/Imath)
+  ENDIF()
+ENDIF()
+
+MARK_AS_ADVANCED(
+  OPENEXR_INCLUDE_DIR
+  OPENEXR_VERSION
+  IMATH_INCLUDE_DIR
+  IMATH_LIBRARY
+)
+FOREACH(COMPONENT ${_openexr_FIND_COMPONENTS})
+  STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+  MARK_AS_ADVANCED(OPENEXR_${UPPERCOMPONENT}_LIBRARY)
+ENDFOREACH()
+
+UNSET(COMPONENT)
+UNSET(UPPERCOMPONENT)
+UNSET(_openexr_FIND_COMPONENTS)
+UNSET(_openexr_LIBRARIES)
+UNSET(_openexr_SEARCH_DIRS)

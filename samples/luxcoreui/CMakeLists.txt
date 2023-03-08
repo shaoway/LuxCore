@@ -22,8 +22,8 @@
 #
 #############################################################################
 
-add_subdirectory(deps/glfw-3.1.1)
-include_directories(deps/glfw-3.1.1/include)
+#add_subdirectory(deps/glfw-3.1.1)
+#include_directories(deps/glfw-3.1.1/include)
 include_directories(deps/nfd/include)
 
 #############################################################################
@@ -83,9 +83,13 @@ ENDIF()
 
 add_executable(luxcoreui ${LUXCOREUI_SRCS})
 
+target_include_directories(luxcoreui
+  PRIVATE
+)
+
 if(APPLE)
 
-TARGET_LINK_LIBRARIES(luxcoreui
+target_link_libraries(luxcoreui
 	glfw
 	expat
 	${GLFW_LIBRARIES}
@@ -94,11 +98,13 @@ TARGET_LINK_LIBRARIES(luxcoreui
 	${GTK3_LIBRARIES}
 	${Boost_LIBRARIES})
 else()
-TARGET_LINK_LIBRARIES(luxcoreui
+  target_link_libraries(luxcoreui PRIVATE
+    luxcore
 	glfw
-	${GLFW_LIBRARIES}
-	${LUXCORE_LIBRARY}
+	# ${LUXCORE_LIBRARY}
 	${OPENGL_LIBRARIES}
 	${GTK3_LIBRARIES}
-	${Boost_LIBRARIES})
+	${Boost_LIBRARIES}
+      )
 endif()
+

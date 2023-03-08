@@ -24,6 +24,8 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <iostream>
 
 #include "luxrays/luxrays.h"
 #include "luxrays/utils/utils.h"

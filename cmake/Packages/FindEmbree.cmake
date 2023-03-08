@@ -1,47 +1,96 @@
-## ======================================================================== ##
-## Copyright 2009-2014 Intel Corporation                                    ##
-##                                                                          ##
-## Licensed under the Apache License, Version 2.0 (the "License");          ##
-## you may not use this file except in compliance with the License.         ##
-## You may obtain a copy of the License at                                  ##
-##                                                                          ##
-##     http://www.apache.org/licenses/LICENSE-2.0                           ##
-##                                                                          ##
-## Unless required by applicable law or agreed to in writing, software      ##
-## distributed under the License is distributed on an "AS IS" BASIS,        ##
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. ##
-## See the License for the specific language governing permissions and      ##
-## limitations under the License.                                           ##
-## ======================================================================== ##
+# SPDX-License-Identifier: BSD-3-Clause
+# - Find Embree library
+# Find the native Embree includes and library
+# This module defines
+#  EMBREE_INCLUDE_DIRS, where to find rtcore.h, Set when
+#                            EMBREE_INCLUDE_DIR is found.
+#  EMBREE_LIBRARIES, libraries to link against to use Embree.
+#  EMBREE_ROOT, The base directory to search for Embree.
+#                        This can also be an environment variable.
+#  EMBREE_FOUND, If false, do not try to use Embree.
 
-FIND_PATH(EMBREE_INCLUDE_PATH NAMES embree3/rtcore.h PATHS
-	${EMBREE_ROOT}/include)
-IF (NOT EMBREE_INCLUDE_PATH)
-	FIND_PATH(EMBREE_INCLUDE_PATH NAMES embree3/rtcore.h PATHS
-		/usr/include
-		/usr/local/include
-		/opt/local/include)
+# If EMBREE_ROOT was defined in the environment, use it.
+IF(NOT EMBREE_ROOT AND NOT $ENV{EMBREE_ROOT} STREQUAL "")
+  SET(EMBREE_ROOT $ENV{EMBREE_ROOT})
 ENDIF()
 
-FIND_LIBRARY(EMBREE_LIBRARY NAMES embree3 libembree3.so.3 PATHS
-	${EMBREE_ROOT}/lib/x64
-	${EMBREE_ROOT}/lib
-	${EMBREE_ROOT}/build
-	NO_DEFAULT_PATH)
-IF (NOT EMBREE_LIBRARY)
-	FIND_LIBRARY(EMBREE_LIBRARY NAMES embree3 libembree3.so.3 PATHS
-		/usr/lib 
-		/usr/lib64
-		/usr/local/lib 
-		/opt/local/lib)
+SET(_embree_SEARCH_DIRS
+  ${EMBREE_ROOT}
+  /opt/lib/embree
+)
+
+FIND_PATH(EMBREE_INCLUDE_DIR
+  NAMES
+    embree3/rtcore.h
+  HINTS
+    ${_embree_SEARCH_DIRS}
+  PATH_SUFFIXES
+    include
+)
+
+IF(NOT (("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64") OR (APPLE AND ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64"))))
+  SET(_embree_SIMD_COMPONENTS
+    embree_sse42
+    embree_avx
+    embree_avx2
+    embree_avx512
+  )
 ENDIF()
 
-IF (EMBREE_INCLUDE_PATH AND EMBREE_LIBRARY)
-	SET(EMBREE_LIBRARY ${EMBREE_LIBRARY})
-	SET(EMBREE_FOUND TRUE)
+SET(_embree_FIND_COMPONENTS
+  embree3
+  ${_embree_SIMD_COMPONENTS}
+  lexers
+  math
+  simd
+  sys
+  tasking
+)
+
+SET(_embree_LIBRARIES)
+FOREACH(COMPONENT ${_embree_FIND_COMPONENTS})
+  STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+
+  FIND_LIBRARY(EMBREE_${UPPERCOMPONENT}_LIBRARY
+    NAMES
+      ${COMPONENT}
+    HINTS
+      ${_embree_SEARCH_DIRS}
+    PATH_SUFFIXES
+      lib64 lib
+    )
+  IF(NOT EMBREE_${UPPERCOMPONENT}_LIBRARY)
+    IF(EMBREE_EMBREE3_LIBRARY)
+      # If we can't find all the static libraries, try to fall back to the shared library if found.
+      # This allows building with a shared embree library
+      SET(_embree_LIBRARIES ${EMBREE_EMBREE3_LIBRARY})
+      BREAK()
+    ENDIF()
+  ENDIF()
+  LIST(APPEND _embree_LIBRARIES "${EMBREE_${UPPERCOMPONENT}_LIBRARY}")
+ENDFOREACH()
+
+
+# handle the QUIETLY and REQUIRED arguments and set EMBREE_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Embree DEFAULT_MSG
+    _embree_LIBRARIES EMBREE_INCLUDE_DIR)
+
+IF(EMBREE_FOUND)
+  SET(EMBREE_LIBRARIES ${_embree_LIBRARIES})
+  SET(EMBREE_INCLUDE_DIRS ${EMBREE_INCLUDE_DIR})
 ENDIF()
 
 MARK_AS_ADVANCED(
-	EMBREE_INCLUDE_PATH
-	EMBREE_LIBRARY
+  EMBREE_INCLUDE_DIR
 )
+
+FOREACH(COMPONENT ${_embree_FIND_COMPONENTS})
+  STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+  MARK_AS_ADVANCED(EMBREE_${UPPERCOMPONENT}_LIBRARY)
+ENDFOREACH()
+
+UNSET(_embree_SEARCH_DIRS)
+UNSET(_embree_FIND_COMPONENTS)
+UNSET(_embree_LIBRARIES)

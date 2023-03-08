@@ -278,14 +278,28 @@ set(LUXRAYS_LIB_SRCS
 add_library(luxrays STATIC ${LUXRAYS_LIB_SRCS})
 add_definitions(-DCPP_API_EXPORTS ${VISIBILITY_FLAGS}) # for controlling visibility
 
-TARGET_LINK_LIBRARIES(luxrays ${OPENIMAGEIO_LIBRARIES})
-TARGET_LINK_LIBRARIES(luxrays ${Boost_LIBRARIES})
+target_include_directories(luxrays
+  PUBLIC
+  ${Boost_INCLUDE_DIRS}
+  ${TBB_INCLUDE_DIRS}
+  ${IMATH_INCLUDE_DIRS}
+  ${EMBREE_INCLUDE_DIRS}
+  ${OPENIMAGEIO_INCLUDE_DIRS}
+)
+
+target_link_libraries(luxrays
+  PUBLIC
+  # ${OPENIMAGEIO_LIBRARIES}
+  # ${OPENIMAGEIO_UTIL_LIBRARY}
+  # ${Boost_LIBRARIES}
+)
+
 if (WIN32)
 # This is needed by Boost 1.67 but is not found automatically
-    TARGET_LINK_LIBRARIES(luxrays bcrypt.lib)
+    target_link_libraries(luxrays bcrypt.lib)
 endif(WIN32)
 
-TARGET_LINK_LIBRARIES(luxrays ${CMAKE_DL_LIBS})
+# target_link_libraries(luxrays PUBLIC ${CMAKE_DL_LIBS})
 
 ################################################################################
 #
@@ -293,4 +307,3 @@ TARGET_LINK_LIBRARIES(luxrays ${CMAKE_DL_LIBS})
 #
 ################################################################################
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../lib")

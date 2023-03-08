@@ -16,35 +16,47 @@
 # limitations under the License.
 ################################################################################
 
-FIND_PATH(BLOSC_INCLUDE_PATH NAMES blosc.h PATHS
-	${BLOSC_ROOT}/include)
-IF (NOT BLOSC_INCLUDE_PATH)
-	FIND_PATH(BLOSC_INCLUDE_PATH NAMES blosc.h PATHS
-		/usr/include
-		/usr/local/include
-		/opt/local/include)
+# If BLOSC_ROOT was defined in the environment, use it.
+IF(NOT BLOSC_ROOT AND NOT $ENV{BLOSC_ROOT} STREQUAL "")
+  SET(BLOSC_ROOT $ENV{BLOSC_ROOT})
 ENDIF()
 
-FIND_LIBRARY(BLOSC_LIBRARY NAMES libblosc blosc libblosc.a PATHS
-	${BLOSC_ROOT}/lib/x64
-	${BLOSC_ROOT}/lib
-	${BLOSC_ROOT}/build
-	NO_DEFAULT_PATH)
-IF (NOT BLOSC_LIBRARY)
-	FIND_LIBRARY(BLOSC_LIBRARY NAMES libblosc blosc libblosc.a PATHS
-		/usr/lib 
-		/usr/lib64
-		/usr/local/lib 
-		/opt/local/lib)
-ENDIF()
+SET(_blosc_SEARCH_DIRS
+  ${BLOSC_ROOT}
+  /opt/lib/blosc
+)
 
-IF (BLOSC_INCLUDE_PATH AND BLOSC_LIBRARY)
-	SET(BLOSC_LIBRARY ${BLOSC_LIBRARY} ${BLOSC_LIBRARY})
-	SET(BLOSC_FOUND TRUE)
+FIND_PATH(BLOSC_INCLUDE_DIR
+  NAMES
+  blosc.h
+  HINTS
+  ${_blosc_SEARCH_DIRS}
+  PATH_SUFFIXES
+  include
+)
+
+FIND_LIBRARY(BLOSC_LIBRARY
+  NAMES
+  blosc
+  HINTS
+  ${_blosc_SEARCH_DIRS}
+  PATH_SUFFIXES
+  lib64 lib
+)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Blosc DEFAULT_MSG
+  BLOSC_LIBRARY BLOSC_INCLUDE_DIR)
+
+IF(BLOSC_FOUND)
+  SET(BLOSC_LIBRARIES ${BLOSC_LIBRARY})
+  SET(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIR})
+ELSE()
+  SET(BLOSC_FOUND FALSE)
 ENDIF()
 
 MARK_AS_ADVANCED(
-	BLOSC_INCLUDE_PATH
-	BLOSC_LIBRARY
+  BLOSC_INCLUDE_DIR
+  BLOSC_LIBRARY
 )
 

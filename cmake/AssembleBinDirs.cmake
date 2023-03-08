@@ -22,12 +22,19 @@
 #
 ################################################################################
 
-IF (WIN32)
+if (WIN32)
 	
   # For MSVC moving exe files gets done automatically
   # If there is someone compiling on windows and
   # not using msvc (express is free) - feel free to implement
 
-ELSE (WIN32)
-	set(CMAKE_INSTALL_PREFIX .)
-ENDIF(WIN32)
+else ()
+  set(CMAKE_INSTALL_PREFIX .)
+endif()
+      
+if(PLATFORM_BUNDLED_LIBRARIES AND TARGETDIR_LIB)
+  file(INSTALL ${PLATFORM_BUNDLED_LIBRARIES}
+    DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGETDIR_LIB}"
+  )
+endif()
+

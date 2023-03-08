@@ -29,4 +29,8 @@ set(LUXCORESCENEDEMO_SRCS
 add_executable(luxcorescenedemo ${LUXCORESCENEDEMO_SRCS})
 add_definitions(${VISIBILITY_FLAGS})
 
-TARGET_LINK_LIBRARIES(luxcorescenedemo ${LUXCORE_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(luxcorescenedemo
+  PRIVATE
+  ${LUXCORE_LIBRARY} ${Boost_LIBRARIES}
+  bz2 deflate fmt
+)

@@ -23,10 +23,27 @@
 ################################################################################
 
 set(LUXCORELIBDEMO_SRCS
-	luxcoredemo.cpp
-	)
+  luxcoredemo.cpp
+)
 
 add_executable(luxcoredemo ${LUXCORELIBDEMO_SRCS})
 add_definitions(${VISIBILITY_FLAGS})
 
-TARGET_LINK_LIBRARIES(luxcoredemo ${LUXCORE_LIBRARY} ${Boost_LIBRARIES} ${OPENCL_LIBRARIES} ${CUDA_ALL_LIBRARIES})
+target_include_directories(luxcoredemo
+  PRIVATE
+  ${Boost_INCLUDE_DIRS}
+)
+
+target_link_directories(luxcoredemo
+  PRIVATE
+)
+
+target_link_libraries(luxcoredemo
+  PRIVATE
+  luxcore
+  ${Boost_THREAD_LIBRARY}
+  # ${Boost_LIBRARIES}
+  ${OPENCL_LIBRARIES} ${CUDA_ALL_LIBRARIES}
+
+)
+
