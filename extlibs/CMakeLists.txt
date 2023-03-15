@@ -29,6 +29,7 @@ include(cmake/options.cmake)
 include(cmake/versions.cmake)
 include(cmake/download.cmake)
 
+include(cmake/fmt.cmake)
 include(cmake/zlib.cmake)
 include(cmake/spdlog.cmake)
 include(cmake/expat.cmake)

@@ -50,6 +50,7 @@ function(download_source dep)
   endif()
 endfunction(download_source)
 
+download_source(FMT)
 download_source(ZLIB)
 download_source(SPDLOG)
 download_source(EXPAT)

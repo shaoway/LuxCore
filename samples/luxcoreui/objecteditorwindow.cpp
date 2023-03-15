@@ -97,7 +97,7 @@ void ObjectEditorWindow::Draw() {
 		// Object properties
 		//----------------------------------------------------------------------
 
-		if (ImGui::CollapsingHeader((objectName + " properties").c_str(), NULL, true, true)) {
+		if (ImGui::CollapsingHeader((objectName + " properties").c_str(), NULL, ImGuiTreeNodeFlags_None)) {
 			ImGui::PushID("Object properties");
 			ImGui::PushItemWidth(ImGui::GetWindowSize().x / 3);
 
@@ -130,7 +130,7 @@ void ObjectEditorWindow::Draw() {
 		// Advance editing
 		//----------------------------------------------------------------------
 
-		if (ImGui::CollapsingHeader("Advance editor", NULL, true, false)) {
+		if (ImGui::CollapsingHeader("Advance editor", NULL, ImGuiTreeNodeFlags_None)) {
 			ImGui::PushID("Advance editor");
 
 			//------------------------------------------------------------------

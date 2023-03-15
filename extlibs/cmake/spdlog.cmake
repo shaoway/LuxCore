@@ -1,6 +1,7 @@
 set(SPDLOG_EXTRA_ARGS
   -DSPDLOG_BUILD_EXAMPLE=OFF
-  -DSPDLOG_FMT_EXTERNAL=OFF
+  -DSPDLOG_FMT_EXTERNAL=ON
+  -Dfmt_ROOT=${LIBDIR}/fmt
 )
 
 ExternalProject_Add(external_spdlog

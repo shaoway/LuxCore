@@ -11,12 +11,19 @@ set(DEFAULT_BOOST_FLAGS
   -DBOOST_LIBRARYDIR=${LIBDIR}/boost/lib/
   -DBoost_USE_DEBUG_PYTHON=On
 )
+
+set(JAM_FILE ${BUILD_DIR}/boost.user-config.jam)
+configure_file(${PATCH_DIR}/boost.user.jam.in ${JAM_FILE})
+set(BOOST_PYTHON_OPTIONS
+  --with-python
+  --user-config=${JAM_FILE}
+)
+
 set(BOOST_HARVEST_CMD echo .)
 set(BOOST_CONFIGURE_COMMAND ./bootstrap.sh)
 set(BOOST_BUILD_COMMAND ./b2)
 set(BOOST_BUILD_OPTIONS cxxflags=${PLATFORM_CXXFLAGS} --disable-icu boost.locale.icu=off)
 set(BOOST_OPTIONS
-  --with-python
   --with-filesystem
   --with-locale
   --with-thread
@@ -32,6 +39,7 @@ set(BOOST_OPTIONS
   -sNO_BZIP2=1
   -sNO_LZMA=1
   -sNO_ZSTD=1
+  ${BOOST_PYTHON_OPTIONS}
 )
 
 ExternalProject_Add(external_boost

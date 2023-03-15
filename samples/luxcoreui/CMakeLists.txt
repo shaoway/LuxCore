@@ -21,18 +21,15 @@
 # GLFW library
 #
 #############################################################################
-
-#add_subdirectory(deps/glfw-3.1.1)
-#include_directories(deps/glfw-3.1.1/include)
-include_directories(deps/nfd/include)
+find_package(glfw3 REQUIRED)
+find_package(Freetype REQUIRED)
+add_subdirectory(imgui)
 
 #############################################################################
 #
 # luxcore UI binary
 #
 #############################################################################
-
-include_directories(deps/imgui-1.46)
 
 set(LUXCOREUI_SRCS
 	luxcoreui.cpp
@@ -59,52 +56,34 @@ set(LUXCOREUI_SRCS
 	haltconditionswindow.cpp
 	statswindow.cpp
 	importancewindow.cpp
-	imgui_impl_glfw.cpp
 	bake.cpp
 	resources/luxlogo_bg.cpp
-	deps/imgui-1.46/imgui.cpp
-	deps/imgui-1.46/imgui_demo.cpp
-	deps/imgui-1.46/imgui_draw.cpp
-	deps/nfd/nfd_common.c
-	)
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	SET(LUXCOREUI_SRCS ${LUXCOREUI_SRCS} deps/nfd/nfd_win.cpp)
-ENDIF()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	SET(LUXCOREUI_SRCS ${LUXCOREUI_SRCS} deps/nfd/nfd_gtk.c)
-	add_definitions(${GTK3_CFLAGS_OTHER})
-ENDIF()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	SET(LUXCOREUI_SRCS ${LUXCOREUI_SRCS} deps/nfd/nfd_cocoa.m)
-ENDIF()
+      )
 
 add_executable(luxcoreui ${LUXCOREUI_SRCS})
 
 target_include_directories(luxcoreui
   PRIVATE
+  imgui/
+  imgui/ImGuiFileDialog
 )
 
 if(APPLE)
 
-target_link_libraries(luxcoreui
-	glfw
-	expat
-	${GLFW_LIBRARIES}
-	${LUXCORE_LIBRARY}
-	${OPENGL_LIBRARIES}
-	${GTK3_LIBRARIES}
-	${Boost_LIBRARIES})
+  target_link_libraries(luxcoreui
+    luxcoreui
+    ${GLFW_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+  )
 else()
   target_link_libraries(luxcoreui PRIVATE
     luxcore
-	glfw
-	# ${LUXCORE_LIBRARY}
-	${OPENGL_LIBRARIES}
-	${GTK3_LIBRARIES}
-	${Boost_LIBRARIES}
-      )
+    imgui
+    OpenGL::GL
+    glfw
+    ${FREETYPE_LIBRARIES}
+    ${Boost_LIBRARIES}
+  )
 endif()
 

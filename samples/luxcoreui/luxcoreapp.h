@@ -53,8 +53,8 @@ public:
 	bool isGPURenderingAvailable() const { return isOpenCLAvailable || isCUDAAvailable; }
 
 	static void LogHandler(const char *msg);
-	static void ColoredLabelText(const ImVec4 &col, const char *label, const char *fmt, ...) IM_PRINTFARGS(3);
-	static void ColoredLabelText(const char *label, const char *fmt, ...) IM_PRINTFARGS(2);
+	static void ColoredLabelText(const ImVec4 &col, const char *label, const char *fmt, ...) IM_FMTARGS(3);
+	static void ColoredLabelText(const char *label, const char *fmt, ...) IM_FMTARGS(2);
 	static void HelpMarker(const char *desc);
 	
 	static ImVec4 colLabel;
@@ -132,6 +132,7 @@ private:
 	void MenuTool();
 	void MenuWindow();
 	void MainMenuBar();
+        void ProcessMainMenuBar();
 
 	void BakeAllSceneObjects();
 	
@@ -167,7 +168,8 @@ private:
 	float *renderImageBuffer;
 	
 	GLFWwindow *window;
-
+        int currentFrameBufferWidth, currentFrameBufferHeight;
+  
 	AppToolType currentTool;
 
 	// ImGui height information

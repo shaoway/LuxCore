@@ -26,6 +26,7 @@
 
 #include <imgui.h>
 #include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include "luxcoreapp.h"
 
@@ -50,24 +51,22 @@ void LuxCoreApp::DrawBackgroundLogo() {
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 
 	ImGui::SetNextWindowPos(ImVec2(0.f, 0.f));
-	ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, frameBufferHeight), ImGuiSetCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, frameBufferHeight), ImGuiCond_Always);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
 
 	bool opened = true;
-	if (ImGui::Begin("Background_logo", &opened, ImVec2(0.f, 0.f), 0.0f,
+	if (ImGui::Begin("Background_logo", &opened,
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
 			ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs)) {
-		const float pad = .2f;
+		const float pad = 0.2f;
 		const float ratio = frameBufferWidth / (float)frameBufferHeight;
 		const float border = (1.f - ratio) * .5f;
 
-		// There seems to be a bug in ImGui, I have to move down the window or
-		// it will hide the menu bar
-		ImGui::SetCursorScreenPos(ImVec2(0, 25));
 		ImGui::Image((void *)(intptr_t)backgroundLogoTexID,
 				ImVec2(frameBufferWidth, frameBufferHeight),
 				ImVec2(border - pad, 1.f + pad), ImVec2(1.f - border + pad, 0.f - pad));
+
 	}
 	ImGui::End();
 
@@ -158,10 +157,10 @@ void LuxCoreApp::DrawRendering() {
 		// Draw the rendering to fill all the window area
 
 		ImGui::SetNextWindowPos(ImVec2(0.f, 0.f));
-		ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, frameBufferHeight), ImGuiSetCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, frameBufferHeight), ImGuiCond_Always);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
 
-		if (ImGui::Begin("Rendering", NULL, ImVec2(0.f, 0.f), 0.0f,
+		if (ImGui::Begin("Rendering", NULL,
 				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 				ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus |
 				ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
@@ -183,10 +182,10 @@ void LuxCoreApp::DrawRendering() {
 
 		ImGui::SetNextWindowPos(ImVec2(0.f, menuBarHeight));
 		ImGui::SetNextWindowContentSize(ImVec2(filmWidth, 0.f));
-		ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, frameBufferHeight - menuBarHeight - captionHeight), ImGuiSetCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, frameBufferHeight - menuBarHeight - captionHeight), ImGuiCond_Always);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
 
-		if (ImGui::Begin("Rendering", NULL, ImVec2(0.f, 0.f), 0.0f,
+		if (ImGui::Begin("Rendering", NULL,
 				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 				ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus |
 				ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -197,7 +196,7 @@ void LuxCoreApp::DrawRendering() {
 
 			DrawTiles();
 
-			mouseHoverRenderingWindow = ImGui::IsMouseHoveringWindow();
+			mouseHoverRenderingWindow = ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
 		}
 		ImGui::End();
 	}
@@ -325,7 +324,7 @@ void LuxCoreApp::DrawCaptions() {
 
 	// Top screen label (to use only in full-screen mode)
 	/*ImGui::SetNextWindowPos(ImVec2(0.f, -8.f));
-	ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, 0.f), ImGuiSetCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(frameBufferWidth, 0.f), ImGuiCond_Always);
 
 	bool topOpened = true;
 	if (ImGui::Begin("Top screen label", &topOpened,
@@ -366,7 +365,7 @@ void LuxCoreApp::DrawCaptions() {
 	const ImVec2 windowSize = ImVec2(frameBufferWidth, textSize.y + 9);
 
 	ImGui::SetNextWindowPos(ImVec2(0.f, frameBufferHeight - windowSize.y));
-	ImGui::SetNextWindowSize(windowSize, ImGuiSetCond_Always);
+	ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
 
 	bool bottomOpened = true;
 	if (ImGui::Begin("Bottom screen label", &bottomOpened,
@@ -410,11 +409,19 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 		exit(EXIT_FAILURE);
 
 #ifdef __APPLE__
-	// working around a glf bug which sets wrong default depth
-	glfwWindowHint(GLFW_DEPTH_BITS, 32);
+        // GL 3.2 + GLSL 150
+        const char* glsl_version = "#version 150";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
-	glfwWindowHint(GLFW_DEPTH_BITS, 0);
-	glfwWindowHint(GLFW_ALPHA_BITS, 0);
+        // GL 3.0 + GLSL 130
+        const char* glsl_version = "#version 130";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
 	//--------------------------------------------------------------------------
@@ -461,14 +468,15 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 
 	// Create the window
 	window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(),
-			optFullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+                                  optFullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		throw runtime_error("Error while opening GLFW window");
 	}
 
-	glfwSetWindowUserPointer(window, this);
+        glfwSetWindowUserPointer(window, this);
 	glfwMakeContextCurrent(window);
+        glfwSwapInterval(1); // Enable vsync
 
 	glfwSetMouseButtonCallback(window, GLFW_MouseButtonCallBack);
 	glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
@@ -478,10 +486,31 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 
 	CenterWindow(window);
 
-	// Setup ImGui binding
-    ImGui_ImplGlfw_Init(window, false);
-	ImGui::GetIO().IniFilename = NULL;
-	ImGui::GetIO().FontAllowUserScaling = true;
+	// Setup ImGui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigWindowsMoveFromTitleBarOnly = true;
+        io.ConfigDockingWithShift = true;
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+        //io.ConfigViewportsNoAutoMerge = true;
+        //io.ConfigViewportsNoTaskBarIcon = true;
+
+        // io.Fonts->AddFontFromFileTTF("", 16);
+        
+
+        // Setup Dear ImGui style
+        //ImGui::StyleColorsDark();
+        //ImGui::StyleColorsLight();
+        ImGui::StyleColorsClassic();
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.ScaleAllSizes(1);
+
+        ImGui_ImplGlfw_InitForOpenGL(window, false);
+        ImGui_ImplOpenGL3_Init(glsl_version);
 
 	int lastFrameBufferWidth, lastFrameBufferHeight;
 	glfwGetFramebufferSize(window, &lastFrameBufferWidth, &lastFrameBufferHeight);
@@ -499,7 +528,7 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 	// Initialize OpenGL
 	//--------------------------------------------------------------------------
 
-    glGenTextures(1, &renderFrameBufferTexID);
+        glGenTextures(1, &renderFrameBufferTexID);
 
 	// Define the background logo texture
 	glGenTextures(1, &backgroundLogoTexID);
@@ -533,7 +562,6 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 		// Refresh the screen
 		//----------------------------------------------------------------------
 
-		int currentFrameBufferWidth, currentFrameBufferHeight;
 		glfwGetFramebufferSize(window, &currentFrameBufferWidth, &currentFrameBufferHeight);
 		// This call is outside the block below because the UI is drawn at every loop
 		// and not only every 1 secs.
@@ -549,8 +577,8 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 				// Check if the frame buffer has been resized
 				// (Windows returns 0 x 0 size when the window is minimized)
 				if ((currentFrameBufferWidth != 0) && (currentFrameBufferHeight != 0) &&
-						((currentFrameBufferWidth != lastFrameBufferWidth) ||
-						(currentFrameBufferHeight != lastFrameBufferHeight))) {
+                                    ((currentFrameBufferWidth != lastFrameBufferWidth) ||
+                                     (currentFrameBufferHeight != lastFrameBufferHeight))) {
 					CloseAllRenderConfigEditors();
 
 					// Check if I have to adjust the film ratio
@@ -576,9 +604,14 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 		//----------------------------------------------------------------------
 		// Draw the UI
 		//----------------------------------------------------------------------
-
+                ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
 
+                // bool show_demo_window = true;
+                // ImGui::ShowDemoWindow(&show_demo_window);
+
+                
 		if (session) {
 			DrawRendering();
 			DrawCaptions();
@@ -604,8 +637,10 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 			userImportancePaintWindow.Draw();
 
 		MainMenuBar();
+                ProcessMainMenuBar();
 
 		ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -716,7 +751,10 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
 	// Exit
 	//--------------------------------------------------------------------------
 
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
 	glfwDestroyWindow(window);
-	ImGui_ImplGlfw_Shutdown();
 	glfwTerminate();
 }

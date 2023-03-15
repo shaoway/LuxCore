@@ -50,7 +50,7 @@ set(OPENIMAGEIO_EXTRA_ARGS
   -Dpugixml_DIR=${LIBDIR}/pugixml/lib/cmake/pugixml
   -DBUILD_MISSING_ROBINMAP=OFF
   -DBUILD_MISSING_FMT=OFF
-#  -DFMT_INCLUDE_DIR=${LIBDIR}/fmt/include/
+  -Dfmt_ROOT=${LIBDIR}/fmt
   -DRobinmap_ROOT=${LIBDIR}/robinmap
   -DWebP_ROOT=${LIBDIR}/webp
   -DOpenEXR_ROOT=${LIBDIR}/openexr
@@ -78,7 +78,7 @@ add_dependencies(
   external_boost
   external_tiff
   external_pugixml
-#  external_fmt
+  external_fmt
   external_robinmap
   external_openjpeg
   external_webp

@@ -253,7 +253,7 @@ void ImageWindow::Draw() {
 		LuxCoreApp::ColoredLabelText("Max. value:", "(%f, %f, %f)", imgMax[0], imgMax[1], imgMax[2]);
 		LuxCoreApp::ColoredLabelText("Avg. value:", "(%f, %f, %f)", imgAvg[0], imgAvg[1], imgAvg[2]);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, 4.f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 4.f);
 		ImGui::BeginChild("Image", ImVec2(0.f, 0.f), true, ImGuiWindowFlags_HorizontalScrollbar);
 
 		const unsigned int filmWidth = app->session->GetFilm().GetWidth();

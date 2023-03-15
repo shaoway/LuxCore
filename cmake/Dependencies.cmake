@@ -25,7 +25,7 @@ getenv_path(LuxRays_DEPENDENCIES_DIR)
 #
 ################################################################################
 
-# Find threading library
+find_package(Python COMPONENTS Development REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Spdlog REQUIRED)
 find_package(Bzip2 REQUIRED)
@@ -52,6 +52,7 @@ find_package(OpenSubdiv REQUIRED)
 find_package(OpenImageDenoise REQUIRED)
 
 add_bundled_libraries(openimageio/lib)
+add_bundled_libraries(boost/lib)
 add_bundled_libraries(tbb/lib)
 add_bundled_libraries(embree/lib)
 add_bundled_libraries(opencolorio/lib)
@@ -63,7 +64,7 @@ find_program(PYSIDE_UIC NAMES pyside-uic pyside2-uic pyside6-uic
 		HINTS "${PYTHON_INCLUDE_DIRS}/../Scripts"
 		PATHS "c:/Program Files/Python${PYTHON_V}/Scripts")
 
-include_directories(${PYTHON_INCLUDE_DIRS})
+# include_directories(${PYTHON_INCLUDE_DIRS})
 
 # Find Boost
 set(Boost_USE_STATIC_LIBS       OFF)
@@ -73,19 +74,8 @@ set(Boost_MINIMUM_VERSION       "1.56.0")
 
 # For Windows builds, PYTHON_V must be defined as "3x" (x=Python minor version, e.g. "35")
 # For other platforms, specifying python minor version is not needed
-set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system chrono serialization)
+set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system chrono serialization python numpy)
 find_package(Boost ${Boost_MINIMUM_VERSION} COMPONENTS ${LUXRAYS_BOOST_COMPONENTS})
-
-set(Boost_LIBRARIES
-  ${Boost_FILESYSTEM_LIBRARY_RELEASE}
-  ${Boost_CHRONO_LIBRARY_RELEASE}
-  ${Boost_IOSTREAMS_LIBRARY_RELEASE}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE}
-  ${Boost_REGEX_LIBRARY_RELEASE}
-  ${Boost_SERIALIZATION_LIBRARY_RELEASE}
-  ${Boost_SYSTEM_LIBRARY_RELEASE}
-  ${Boost_THREAD_LIBRARY_RELEASE}
-)
 
 # OpenMP
 if(NOT APPLE)
@@ -100,11 +90,11 @@ if(NOT APPLE)
 endif()
 
 # Find GTK 3.0 for Linux only (required by luxcoreui NFD)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	find_package(PkgConfig REQUIRED)
-	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-	include_directories(${GTK3_INCLUDE_DIRS})
-endif()
+# if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+# 	find_package(PkgConfig REQUIRED)
+# 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+# 	include_directories(${GTK3_INCLUDE_DIRS})
+# endif()
 
 # Find BISON
 IF (NOT BISON_NOT_AVAILABLE)

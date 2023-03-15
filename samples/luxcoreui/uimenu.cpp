@@ -20,7 +20,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <nfd.h>
+#include <ImGuiFileDialog.h>
 
 #include "luxcoreapp.h"
 
@@ -37,64 +37,28 @@ static void KernelCacheFillProgressHandler(const size_t step, const size_t count
 }
 
 void LuxCoreApp::MenuRendering() {
-	if (ImGui::MenuItem("Load")) {
-		nfdchar_t *fileFileName = NULL;
-		nfdresult_t result = NFD_OpenDialog("cfg,bcf,lxs;cfg;bcf;lxs", NULL, &fileFileName);
-
-		if (result == NFD_OKAY) {
-			LoadRenderConfig(fileFileName);
-			free(fileFileName);
-		}
-	}
-
+        std::string fileName;
+	if (ImGui::MenuItem("Load"))
+                ImGuiFileDialog::Instance()->OpenDialog("ChooseFile", "Choose File",
+                                                        ".cfg,.bcf,.lxs", ".", 1, nullptr,
+                                                        ImGuiFileDialogFlags_Modal);
 	if (session) {
 		ImGui::Separator();
 
-		if (ImGui::MenuItem("Export")) {
-			nfdchar_t *outPath = NULL;
-			nfdresult_t result = NFD_SaveDialog(NULL, NULL, &outPath);
+		if (ImGui::MenuItem("Export"))
+                        ImGuiFileDialog::Instance()->OpenDialog("ChooseDirExport", "Choose a Directory",
+                                                                nullptr, ".", 1, nullptr,
+                                                                ImGuiFileDialogFlags_Modal);
 
-			if (result == NFD_OKAY) {
-				LA_LOG("Export current scene to directory in text format: " << outPath);
+		if (ImGui::MenuItem("Export (binary)"))
+                        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileExport", "Choose File",
+                                                                ".bcf", ".", 1, nullptr,
+                                                                ImGuiFileDialogFlags_Modal|ImGuiFileDialogFlags_ConfirmOverwrite);
 
-				boost::filesystem::path dir(outPath);
-				boost::filesystem::create_directories(dir);
-
-				// Save the current render engine
-				const string renderEngine = config->GetProperty("renderengine.type").Get<string>();
-
-				// Set the render engine to FILESAVER
-				RenderConfigParse(Properties() <<
-						Property("renderengine.type")("FILESAVER") <<
-						Property("filesaver.format")("TXT") <<
-						Property("filesaver.directory")(outPath) <<
-						Property("filesaver.renderengine.type")(renderEngine));
-
-				// Restore the render engine setting
-				RenderConfigParse(Properties() <<
-						Property("renderengine.type")(renderEngine));
-			}
-		}
-
-		if (ImGui::MenuItem("Export (binary)")) {
-			nfdchar_t *fileName = NULL;
-			nfdresult_t result = NFD_SaveDialog("bcf", NULL, &fileName);
-
-			if (result == NFD_OKAY) {
-				LA_LOG("Export current scene to file in binary format: " << fileName);
-				config->Save(fileName);
-			}
-		}
-
-		if (ImGui::MenuItem("Export (glTF)")) {
-			nfdchar_t *fileName = NULL;
-			nfdresult_t result = NFD_SaveDialog("gltf", NULL, &fileName);
-
-			if (result == NFD_OKAY) {
-				LA_LOG("Export current scene to file in glTF format: " << fileName);
-				config->ExportGLTF(fileName);
-			}
-		}
+		if (ImGui::MenuItem("Export (glTF)"))
+                        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileExportglTF", "Choose File",
+                                                                ".gltf", ".", 1, nullptr,
+                                                                ImGuiFileDialogFlags_Modal|ImGuiFileDialogFlags_ConfirmOverwrite);
 	}
 	
 	if (session) {
@@ -107,34 +71,16 @@ void LuxCoreApp::MenuRendering() {
 	if (session) {
 		ImGui::Separator();
 
-		if (ImGui::MenuItem("Save rendering")) {
-			nfdchar_t *fileName = NULL;
-			nfdresult_t result = NFD_SaveDialog("rsm", NULL, &fileName);
-
-			if (result == NFD_OKAY) {
-				// Pause the current rendering
-				session->Pause();
-
-				// Save the session
-				session->SaveResumeFile(string(fileName));
-
-				// Resume the current rendering
-				session->Resume();
-			}
-		}
+		if (ImGui::MenuItem("Save rendering"))
+                        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileSaveRendering", "Choose File",
+                                                                ".rsm", ".", 1 , nullptr,
+                                                                ImGuiFileDialogFlags_Modal|ImGuiFileDialogFlags_ConfirmOverwrite);
 	}
 
-	if (ImGui::MenuItem("Resume rendering")) {
-		// Select the scene
-		nfdchar_t *fileName = NULL;
-		nfdresult_t result = NFD_OpenDialog("rsm", NULL, &fileName);
-
-		if (result == NFD_OKAY) {
-			LoadRenderConfig(fileName);
-
-			free(fileName);
-		}
-	}
+	if (ImGui::MenuItem("Resume rendering"))
+                ImGuiFileDialog::Instance()->OpenDialog("ChooseFileResumeRendering", "Choose File",
+                                                        ".rsm", ".",1, nullptr,
+                                                        ImGuiFileDialogFlags_Modal);
 
 	ImGui::Separator();
 
@@ -580,4 +526,95 @@ void LuxCoreApp::MainMenuBar() {
 		menuBarHeight = ImGui::GetWindowHeight();
 		ImGui::EndMainMenuBar();
 	}
+}
+
+void LuxCoreApp::ProcessMainMenuBar() {
+        std::string fileName;
+        std::string outPath;
+        ImGuiWindowFlags winFlags = ImGuiWindowFlags_NoCollapse |ImGuiWindowFlags_NoSavedSettings;
+        ImVec2 maxSize = ImVec2((float)currentFrameBufferWidth, (float)currentFrameBufferHeight);
+        ImVec2 minSize = ImVec2(maxSize.x * 0.5f, maxSize.y * 0.5f);
+        
+        // Load
+        if (ImGuiFileDialog::Instance()->Display("ChooseFile", winFlags, minSize, maxSize)) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                        fileName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        LoadRenderConfig(fileName.c_str());
+                }
+                ImGuiFileDialog::Instance()->Close();
+        }
+
+        // Export
+        if (ImGuiFileDialog::Instance()->Display("ChooseDirExport", winFlags, minSize, maxSize)) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                        outPath = ImGuiFileDialog::Instance()->GetCurrentPath();
+                        LA_LOG("Export current scene to directory in text format: " << outPath);
+
+                        boost::filesystem::path dir(outPath);
+                        boost::filesystem::create_directories(dir);
+
+                        // Save the current render engine
+                        const std::string renderEngine = config->GetProperty("renderengine.type").Get<std::string>();
+
+                        // Set the render engine to FILESAVER
+                        RenderConfigParse(Properties() <<
+                                          Property("renderengine.type")("FILESAVER") <<
+                                          Property("filesaver.format")("TXT") <<
+                                          Property("filesaver.directory")(outPath) <<
+                                          Property("filesaver.renderengine.type")(renderEngine));
+
+                        // Restore the render engine setting
+                        RenderConfigParse(Properties() <<
+                                          Property("renderengine.type")(renderEngine));
+
+                }
+                ImGuiFileDialog::Instance()->Close();
+        }
+
+        // Export (binary)
+        if (ImGuiFileDialog::Instance()->Display("ChooseFileExport", winFlags, minSize, maxSize)) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                        fileName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        LA_LOG("Export current scene to file in binary format: " << fileName);
+                        config->Save(fileName);
+                }
+                ImGuiFileDialog::Instance()->Close();
+        }
+
+        // Export (glTF)
+        if (ImGuiFileDialog::Instance()->Display("ChooseFileExportglTF", winFlags, minSize, maxSize)) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                        fileName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        LA_LOG("Export current scene to file in glTF format: " << fileName);
+                        config->ExportGLTF(fileName);
+                }
+                ImGuiFileDialog::Instance()->Close();
+        }
+
+        // Save rendering
+        if (ImGuiFileDialog::Instance()->Display("ChooseFileSaveRendering", winFlags, minSize, maxSize)) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                        fileName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        // Pause the current rendering
+                        session->Pause();
+
+                        // Save the session
+                        session->SaveResumeFile(fileName);
+
+                        // Resume the current rendering
+                        session->Resume();
+
+                }
+                ImGuiFileDialog::Instance()->Close();
+        }
+
+        // Resume rendering
+        if (ImGuiFileDialog::Instance()->Display("ChooseFileResumeRendering", winFlags, minSize, maxSize)) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                        fileName = ImGuiFileDialog::Instance()->GetFilePathName();
+                        LoadRenderConfig(fileName);
+                }
+                ImGuiFileDialog::Instance()->Close();
+        }
+
 }
