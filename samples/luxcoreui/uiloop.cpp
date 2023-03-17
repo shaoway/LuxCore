@@ -495,6 +495,7 @@ void LuxCoreApp::RunApp(luxcore::RenderState *startState, luxcore::Film *startFi
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigWindowsMoveFromTitleBarOnly = true;
         io.ConfigDockingWithShift = true;
+        io.IniFilename = NULL;
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
         //io.ConfigViewportsNoAutoMerge = true;
         //io.ConfigViewportsNoTaskBarIcon = true;

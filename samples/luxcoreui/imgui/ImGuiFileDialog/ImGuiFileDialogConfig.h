@@ -33,21 +33,21 @@
 //#define DisplayMode_ThumbailsGrid_ButtonString "TG"
 //#define DisplayMode_ThumbailsGrid_ButtonHelp "Thumbnails Grid"
 
-//#define USE_EXPLORATION_BY_KEYS
+#define USE_EXPLORATION_BY_KEYS
 // this mapping by default is for GLFW but you can use another
-//#include <GLFW/glfw3.h> 
+#include <GLFW/glfw3.h> 
 // Up key for explore to the top
-//#define IGFD_KEY_UP ImGuiKey_UpArrow
+#define IGFD_KEY_UP ImGuiKey_UpArrow
 // Down key for explore to the bottom
-//#define IGFD_KEY_DOWN ImGuiKey_DownArrow
+#define IGFD_KEY_DOWN ImGuiKey_DownArrow
 // Enter key for open directory
-//#define IGFD_KEY_ENTER ImGuiKey_Enter
+#define IGFD_KEY_ENTER ImGuiKey_Enter
 // BackSpace for comming back to the last directory
-//#define IGFD_KEY_BACKSPACE ImGuiKey_Backspace
+#define IGFD_KEY_BACKSPACE ImGuiKey_Backspace
 
 // by ex you can quit the dialog by pressing the key excape
-//#define USE_DIALOG_EXIT_WITH_KEY
-//#define IGFD_EXIT_KEY ImGuiKey_Escape
+#define USE_DIALOG_EXIT_WITH_KEY
+#define IGFD_EXIT_KEY ImGuiKey_Escape
 
 // widget
 // begin combo widget
@@ -118,10 +118,10 @@
 //#define defaultSortOrderDate true
 //#define defaultSortOrderThumbnails true
 
-//#define USE_BOOKMARK
-//#define bookmarkPaneWith 150.0f
+#define USE_BOOKMARK
+#define bookmarkPaneWith 150.0f
 //#define IMGUI_TOGGLE_BUTTON ToggleButton
-//#define bookmarksButtonString "Bookmark"
-//#define bookmarksButtonHelpString "Bookmark"
-//#define addBookmarkButtonString "+"
-//#define removeBookmarkButtonString "-"
+#define bookmarksButtonString "Bookmark"
+#define bookmarksButtonHelpString "Bookmark"
+#define addBookmarkButtonString "+"
+#define removeBookmarkButtonString "-"

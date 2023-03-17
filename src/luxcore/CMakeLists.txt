@@ -177,6 +177,30 @@ if (BUILD_LUXCORE_DLL)
   )
 else()
   add_library(luxcore STATIC ${LUXCORE_LIB_SRCS} ${LUX_PARSER_SRC})
+  target_link_libraries(luxcore PRIVATE slg-core slg-film slg-kernels luxrays bcd
+    ${OPENSUBDIV_OSDCPU_LIBRARY}
+    ${OPENVDB_LIBRARIES}
+    ${OPENCOLORIO_LIBRARIES}
+    ${BLOSC_LIBRARIES}
+    ${EMBREE_LIBRARIES}
+    ${OPENIMAGEDENOISE_LIBRARIES}
+    ${TBB_LIBRARIES}
+    ${OPENIMAGEIO_LIBRARIES}
+    ${JSON_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${WEBP_LIBRARIES}
+    ${TIFF_LIBRARIES}
+    ${JPEG_LIBRARIES}
+    ${OPENEXR_LIBRARIES}
+    ${PUGIXML_LIBRARIES}
+    ${MINIZIPNG_LIBRARIES}
+    ${OPENJPEG_LIBRARIES}
+    ${SPDLOG_LIBRARIES}
+    ${IMATH_LIBRARIES}
+    ${BZIP2_LIBRARIES}
+  )
+
 endif()
 
 include_directories(${LuxRays_SOURCE_DIR}/deps/bcd-1.1/include)

@@ -97,7 +97,7 @@ all: .FORCE
 	-DOPENEXR_ROOT=$(LIBDIR)/openexr                                               \
 	-DOPENSUBDIV_ROOT=$(LIBDIR)/opensubdiv                                         \
 	-DOPENVDB_ROOT=$(LIBDIR)/openvdb                                               \
-	-DBUILD_LUXCORE_DLL=ON
+	-DBUILD_LUXCORE_DLL=OFF
 	@echo
 	@echo Build LuxCoreRender ...
 	make -C "$(BUILD_DIR)" -j $(NPROCS) VERBOSE=$(V)

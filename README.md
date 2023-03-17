@@ -1,4 +1,47 @@
-[![Build Status](https://dev.azure.com/LuxCoreRender/LuxCoreRender/_apis/build/status/LuxCoreRender.LuxCore)](https://dev.azure.com/LuxCoreRender/LuxCoreRender/_build/latest?definitionId=1)
+### Shaoway's fork of LuxCoreRender
+
+#### The HighLight of this fork
+
+1. The in source tree dependence libraries are deleted. Building this dep-libs by `make deps`.
+
+    - Boost                v1.80.0
+    - Tbb                  2020
+    - Embree               v3.13.4
+    - OpenEXR              v3.1.5
+    - OpenColorIO          v2.2.0
+    - OpenImageIO          v2.4.6.0
+    - OpenImageDenoise     v1.4.3
+    - OpenVDB              v10.0.0
+    
+2. Revamp luxcoreui using new imgui and ImGuiFileDialog instead of NFD.
+
+    - imgui                v1.89.4
+    - ImGuiFileDialog      v0.6.5
+    
+3. Using C++-17 and fix some issues.
+    
+#### How to build
+
+**Linux Only For Now**
+
+make dependencies and install into ../lib/ 
+
+```
+make deps
+```
+
+build the LuxCoreRender
+
+```
+make
+```
+
+see GNUmakefile.
+
+#### TODO
+
+1. Add a cmake variable to building/using static dependence libraries.
+
 
 ### LuxCoreRender
 
