@@ -18,6 +18,10 @@
     - imgui                v1.89.4
     - ImGuiFileDialog      v0.6.5
     
+    The new ImGuiFileDialog screenshot:
+    ![Screenshot from 2023-03-22 15-44-32](https://user-images.githubusercontent.com/80565033/226834292-2ab134b9-fee5-4a7d-8307-367168bb299d.png)
+
+    
 3. Using C++-17 and fix some issues.
     
 #### How to build
