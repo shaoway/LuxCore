@@ -51,6 +51,7 @@ set(OPENIMAGEIO_EXTRA_ARGS
   -DBUILD_MISSING_ROBINMAP=OFF
   -DBUILD_MISSING_FMT=OFF
   -Dfmt_ROOT=${LIBDIR}/fmt
+  -Dfmt_DIR=${LIBDIR}/fmt
   -DRobinmap_ROOT=${LIBDIR}/robinmap
   -DWebP_ROOT=${LIBDIR}/webp
   -DOpenEXR_ROOT=${LIBDIR}/openexr

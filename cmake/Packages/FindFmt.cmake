@@ -22,7 +22,7 @@ find_library(FMT_LIBRARY
   NAMES
     fmt
   HINTS
-    ${_tbb_SEARCH_DIRS}
+    ${_fmt_SEARCH_DIRS}
   PATH_SUFFIXES
     lib64 lib
   )

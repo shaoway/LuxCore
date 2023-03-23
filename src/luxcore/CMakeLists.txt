@@ -174,6 +174,8 @@ if (BUILD_LUXCORE_DLL)
     ${SPDLOG_LIBRARIES}
     ${IMATH_LIBRARIES}
     ${BZIP2_LIBRARIES}
+    ${SPDLOG_LIBRARIES}
+    ${FMT_LIBRARIES}
   )
 else()
   add_library(luxcore STATIC ${LUXCORE_LIB_SRCS} ${LUX_PARSER_SRC})
@@ -199,6 +201,8 @@ else()
     ${SPDLOG_LIBRARIES}
     ${IMATH_LIBRARIES}
     ${BZIP2_LIBRARIES}
+    ${SPDLOG_LIBRARIES}
+    ${FMT_LIBRARIES}
   )
 
 endif()
@@ -226,10 +230,13 @@ target_include_directories(luxcore
   ${OPENJPEG_INCLUDE_DIRS}
   ${SPDLOG_INCLUDE_DIRS}
   ${IMATH_INCLUDE_DIRS}
+  ${SPDLOG_INCLUDE_DIRS}
+  ${FMT_INCLUDE_DIRS}
 )
 
 add_definitions(-DCPP_API_EXPORTS ${VISIBILITY_FLAGS}) # for controlling visibility
 target_link_directories(luxcore PRIVATE ${SLG_LIB_DIR} ${LuxRays_LIB_DIR})
+target_compile_definitions(luxcore PRIVATE SPDLOG_COMPILED_LIB SPDLOG_FMT_EXTERNAL)
 
 ################################################################################
 #
@@ -266,6 +273,8 @@ target_include_directories(pyluxcore
   ${OPENJPEG_INCLUDE_DIRS}
   ${SPDLOG_INCLUDE_DIRS}
   ${IMATH_INCLUDE_DIRS}
+  ${SPDLOG_INCLUDE_DIRS}
+  ${FMT_INCLUDE_DIRS}
 )
 
 if(APPLE)
@@ -297,6 +306,8 @@ else()
     ${Python_LIBRARIES}
   )
 endif()
+
+target_compile_definitions(pyluxcore PRIVATE SPDLOG_COMPILED_LIB SPDLOG_FMT_EXTERNAL)
 
 set_target_properties(pyluxcore PROPERTIES PREFIX "")
 if(MSVC)

@@ -76,6 +76,7 @@ all: .FORCE
 	-DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) -DLIBDIR=$(LIBDIR)                     \
 	-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON                                        \
 	-DBoost_ROOT=$(LIBDIR)/boost                                                   \
+	-DFMT_ROOT=${LIBDIR}/fmt                                                       \
 	-DSPDLOG_ROOT=${LIBDIR}/spdlog                                                 \
 	-DBZIP2_ROOT=${LIBDIR}/bzip2                                                   \
 	-DWEBP_ROOT=${LIBDIR}/webp                                                     \

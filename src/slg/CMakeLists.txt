@@ -755,7 +755,6 @@ set(SLG_FILM_SRCS
 SOURCE_GROUP("Source Files\\SLG Film Library" FILES ${SLG_FILM_SRCS})
 
 add_library(slg-film STATIC ${SLG_FILM_SRCS})
-message(STATUS "MY IMATH: ${IMATH_INCLUDE_DIR}")
 target_include_directories(slg-film
   PUBLIC
   ${SLG_INCS}

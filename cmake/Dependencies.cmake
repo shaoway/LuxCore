@@ -27,6 +27,7 @@ getenv_path(LuxRays_DEPENDENCIES_DIR)
 
 find_package(Python COMPONENTS Development REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Fmt REQUIRED)
 find_package(Spdlog REQUIRED)
 find_package(Bzip2 REQUIRED)
 find_package(PugiXml REQUIRED)
