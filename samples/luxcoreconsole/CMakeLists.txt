@@ -39,6 +39,6 @@ else()
     PRIVATE
     ${LUXCORE_LIBRARY}
     ${Boost_LIBRARIES}
-    bz2 deflate fmt
+    # bz2 deflate fmt
   )
 endif()
