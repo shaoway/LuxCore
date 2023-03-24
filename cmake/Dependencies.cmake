@@ -68,7 +68,11 @@ find_program(PYSIDE_UIC NAMES pyside-uic pyside2-uic pyside6-uic
 # include_directories(${PYTHON_INCLUDE_DIRS})
 
 # Find Boost
-set(Boost_USE_STATIC_LIBS       OFF)
+if(BUILD_STATIC)
+  set(Boost_USE_STATIC_LIBS       ON)
+else()
+  set(Boost_USE_STATIC_LIBS       OFF)
+endif()
 set(Boost_USE_MULTITHREADED     ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 set(Boost_MINIMUM_VERSION       "1.56.0")
@@ -76,7 +80,7 @@ set(Boost_MINIMUM_VERSION       "1.56.0")
 # For Windows builds, PYTHON_V must be defined as "3x" (x=Python minor version, e.g. "35")
 # For other platforms, specifying python minor version is not needed
 set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system chrono serialization python numpy)
-find_package(Boost ${Boost_MINIMUM_VERSION} COMPONENTS ${LUXRAYS_BOOST_COMPONENTS})
+find_package(Boost ${Boost_MINIMUM_VERSION} COMPONENTS ${LUXRAYS_BOOST_COMPONENTS} REQUIRED)
 
 # OpenMP
 if(NOT APPLE)

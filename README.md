@@ -28,23 +28,19 @@
 
 **Linux Only For Now**
 
-make dependencies and install into ../lib/ 
+make dependencies and install into ../lib/. Set BUILD_STATIC=ON will build libraries as static.
 
 ```
-make deps
+make deps BUILD_STATIC=[ON/OFF]
 ```
 
-build the LuxCoreRender
+build the LuxCoreRender. BUILD_STATIC=ON will make LuxCoreRender using static libs.
 
 ```
-make
+make BUILD_TYPE=[Debug/Release] BUILD_STATIC=[ON/OFF]
 ```
 
 see GNUmakefile.
-
-#### TODO
-
-1. Add a cmake variable to building/using static dependence libraries.
 
 
 ### LuxCoreRender

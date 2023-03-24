@@ -1,11 +1,27 @@
+set(OPENVDB_BUILD_TYPE)
+if(BUILD_STATIC)
+  set(OPENVDB_BUILD_TYPE
+    -DTBB_USE_STATIC_LIBS=ON
+    -DBoost_USE_STATIC_LIBS=ON
+    -DOPENVDB_CORE_SHARED=OFF
+    -DOPENVDB_CORE_STATIC=ON
+  )
+else()
+  set(OPENVDB_BUILD_TYPE
+    -DTBB_USE_STATIC_LIBS=OFF
+    -DBoost_USE_STATIC_LIBS=OFF
+    -DOPENVDB_CORE_SHARED=ON
+    -DOPENVDB_CORE_STATIC=OFF
+  )
+endif()
+
 set(OPENVDB_EXTRA_ARGS
   ${DEFAULT_BOOST_FLAGS}
   -DUSE_STATIC_DEPENDENCIES=OFF   # This is the global toggle for static libs
   # Once the above switch is off, you can set it
   # for each individual library below.
+  ${OPENVDB_BUILD_TYPE}
   -DBLOSC_USE_STATIC_LIBS=ON
-  -DTBB_USE_STATIC_LIBS=OFF
-  -DBoost_USE_STATIC_LIBS=OFF
   -DZLIB_LIBRARY=${LIBDIR}/zlib/lib/libz.a
   -DZLIB_INCLUDE_DIR=${LIBDIR}/zlib/include/
   -DBlosc_INCLUDE_DIR=${LIBDIR}/blosc/include/
@@ -19,10 +35,7 @@ set(OPENVDB_EXTRA_ARGS
   -DTBB_ROOT=${LIBDIR}/tbb/
   -DTbb_INCLUDE_DIR=${LIBDIR}/tbb/include
   -DTbb_LEGACY_INCLUDE_DIR=${LIBDIR}/tbb/include
-  -DOPENVDB_CORE_SHARED=ON
-  -DOPENVDB_CORE_STATIC=OFF
   -DOPENVDB_BUILD_BINARIES=OFF
-  -DBLOSC_USE_STATIC_LIBS=ON
   -DUSE_NANOVDB=ON
   -DImath_ROOT=${LIBDIR}/imath
   -DUSE_IMATH_HALF=ON
@@ -45,3 +58,5 @@ add_dependencies(
   external_zlib
   external_blosc
 )
+
+unset(OPENVDB_BUILD_TYPE)

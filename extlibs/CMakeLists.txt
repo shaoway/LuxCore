@@ -22,6 +22,9 @@ cmake_minimum_required(VERSION 3.20)
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW) # CMake 3.24+ Set the date/time for extracted files to time of extraction
 endif()
+
+option(BUILD_STATIC "build static libraries" OFF)
+
 include(ExternalProject)
 
 include(cmake/check.cmake)

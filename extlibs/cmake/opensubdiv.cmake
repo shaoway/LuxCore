@@ -1,3 +1,9 @@
+set(OPENSUBDIV_TBB_LIB)
+if(BUILD_STATIC)
+  set(OPENSUBDIV_TBB_LIB ${LIBDIR}/tbb/lib/libtbb.a)
+else()
+  set(OPENSUBDIV_TBB_LIB ${LIBDIR}/tbb/lib/libtbb.so)
+endif()
 
 set(OPENSUBDIV_EXTRA_ARGS
   -DNO_LIB=OFF
@@ -20,7 +26,7 @@ set(OPENSUBDIV_EXTRA_ARGS
   -DNO_GLFW=ON
   -DNO_GLFW_X11=ON
   -DTBB_INCLUDE_DIR=${LIBDIR}/tbb/include
-  -DTBB_tbb_LIBRARY=${LIBDIR}/tbb/lib/libtbb.so
+  -DTBB_tbb_LIBRARY=${OPENSUBDIV_TBB_LIB}
 )
 
 ExternalProject_Add(external_opensubdiv
@@ -32,7 +38,17 @@ ExternalProject_Add(external_opensubdiv
   INSTALL_DIR ${LIBDIR}/opensubdiv
 )
 
+if (BUILD_STATIC)
+  ExternalProject_Add_Step(external_opensubdiv after_install
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${LIBDIR}/opensubdiv/lib/libosdCPU.so ${LIBDIR}/opensubdiv/lib/libosdCPU.so.3.5.0
+    DEPENDEES install
+  )
+endif()
+
 add_dependencies(
   external_opensubdiv
   external_tbb
 )
+
+
+unset(OPENSUBDIV_TBB_LIB)

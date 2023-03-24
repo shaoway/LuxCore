@@ -15,6 +15,8 @@ Environment Variables
 
    * BUILD_CMAKE_ARGS:      Arguments passed to CMake.
    * BUILD_DIR:             Override default build path.
+   * BUILD_TYPE:            Debug or Release
+   * BUILD_STATIC:          Build dep libs static
    * NPROCS:                Number of processes to use building (auto-detect when omitted).
 
 Information
@@ -50,6 +52,7 @@ endif
 
 LUX_DIR:=$(shell pwd -P)
 BUILD_TYPE?=Release
+BUILD_STATIC?=ON
 
 CMAKE_CONFIG_ARGS := $(BUILD_CMAKE_ARGS)
 
@@ -98,7 +101,7 @@ all: .FORCE
 	-DOPENEXR_ROOT=$(LIBDIR)/openexr                                               \
 	-DOPENSUBDIV_ROOT=$(LIBDIR)/opensubdiv                                         \
 	-DOPENVDB_ROOT=$(LIBDIR)/openvdb                                               \
-	-DBUILD_LUXCORE_DLL=OFF
+	-DBUILD_LUXCORE_DLL=OFF -DBUILD_STATIC=$(BUILD_STATIC)
 	@echo
 	@echo Build LuxCoreRender ...
 	make -C "$(BUILD_DIR)" -j $(NPROCS) VERBOSE=$(V)
@@ -110,7 +113,8 @@ deps: .FORCE
 	@cmake -S"$(DEPS_SOURCE_DIR)" \
 	       -B"$(DEPS_BUILD_DIR)"  \
                -G"Unix Makefiles"     \
-	       -DLIBDIR=$(LIBDIR)
+	       -DLIBDIR=$(LIBDIR)     \
+	       -DBUILD_STATIC=$(BUILD_STATIC)
 
 	@echo
 	@echo Building dependencies ...

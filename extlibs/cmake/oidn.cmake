@@ -1,13 +1,21 @@
+set(OIDN_BUILD_TYPE)
+
+if(BUILD_STATIC)
+  set(OIDN_BUILD_TYPE
+    -DOIDN_STATIC_LIB=ON
+  )
+else()
+  set(OIDN_BUILD_TYPE
+    -DOIDN_STATIC_LIB=OFF
+  )
+endif()
+
 set(OIDN_EXTRA_ARGS
+  ${OIDN_BUILD_TYPE}
   -DOIDN_APPS=ON
   -DTBB_ROOT=${LIBDIR}/tbb
-  -DTBB_STATIC_LIB=OFF
-  -DOIDN_STATIC_LIB=OFF
-  -DOIDN_STATIC_RUNTIME=OFF
   -DISPC_EXECUTABLE=ispc
   -DOIDN_FILTER_RTLIGHTMAP=OFF
-  -Dtbb_LIBRARY_RELEASE=${LIBDIR}/tbb/lib/libtbb.so
-  -Dtbbmalloc_LIBRARY_RELEASE=${LIBDIR}/tbb/lib/libtbbmalloc.so
 )
 
 ExternalProject_Add(external_openimagedenoise
@@ -23,3 +31,5 @@ add_dependencies(
   external_openimagedenoise
   external_tbb
 )
+
+unset(OIDN_BUILD_TYPE)

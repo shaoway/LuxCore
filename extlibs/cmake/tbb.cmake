@@ -1,12 +1,23 @@
+set(TBB_BUILD_TYPE)
+if (BUILD_STATIC)
+  set(TBB_BUILD_TYPE
+    -DTBB_BUILD_SHARED=OFF
+    -DTBB_BUILD_STATIC=ON    
+  )
+else()
+  set(TBB_BUILD_TYPE
+    -DTBB_BUILD_SHARED=ON
+    -DTBB_BUILD_STATIC=OFF
+  )
+endif()
+
 set(TBB_EXTRA_ARGS
-  -DTBB_BUILD_SHARED=ON
+  ${TBB_BUILD_TYPE}
   -DTBB_BUILD_TBBMALLOC=ON
   -DTBB_BUILD_TBBMALLOC_PROXY=ON
-  -DTBB_BUILD_STATIC=OFF
   -DTBB_BUILD_TESTS=OFF
 )
 set(TBB_LIBRARY tbb)
-set(TBB_STATIC_LIBRARY Off)
 
 # CMake script for TBB from https://github.com/wjakob/tbb/blob/master/CMakeLists.txt
 ExternalProject_Add(external_tbb
@@ -18,3 +29,18 @@ ExternalProject_Add(external_tbb
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LIBDIR}/tbb ${DEFAULT_CMAKE_FLAGS} ${TBB_EXTRA_ARGS}
   INSTALL_DIR ${LIBDIR}/tbb
 )
+
+if (BUILD_STATIC)
+  ExternalProject_Add_Step(external_tbb after_install
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${LIBDIR}/tbb/lib/libtbb.so
+                                      ${LIBDIR}/tbb/lib/libtbbmalloc_proxy.so
+                                      ${LIBDIR}/tbb/lib/libtbbmalloc.so
+    COMMAND ${CMAKE_COMMAND} -E rename ${LIBDIR}/tbb/lib/libtbb_static.a ${LIBDIR}/tbb/lib/libtbb.a
+    COMMAND ${CMAKE_COMMAND} -E rename ${LIBDIR}/tbb/lib/libtbbmalloc_static.a ${LIBDIR}/tbb/lib/libtbbmalloc.a
+    COMMAND ${CMAKE_COMMAND} -E rename ${LIBDIR}/tbb/lib/libtbbmalloc_proxy_static.a ${LIBDIR}/tbb/lib/libtbbmalloc_proxy.a
+    DEPENDEES install
+  )
+
+endif()
+
+unset(TBB_BUILD_TYPE)
