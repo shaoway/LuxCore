@@ -188,6 +188,8 @@ endif()
 include_directories(${LuxRays_SOURCE_DIR}/deps/bcd-1.1/include)
 target_include_directories(luxcore
   PUBLIC
+  ${FMT_INCLUDE_DIR}
+  ${SPDLOG_INCLUDE_DIRS}
   ${OPENSUBDIV_INCLUDE_DIRS}
   ${OPENVDB_INCLUDE_DIRS}
   ${OPENCOLORIO_INCLUDE_DIRS}
@@ -206,10 +208,7 @@ target_include_directories(luxcore
   ${PUGIXML_INCLUDE_DIRS}
   ${MINIZIPNG_INCLUDE_DIRS}
   ${OPENJPEG_INCLUDE_DIRS}
-  ${SPDLOG_INCLUDE_DIRS}
   ${IMATH_INCLUDE_DIRS}
-  ${SPDLOG_INCLUDE_DIRS}
-  ${FMT_INCLUDE_DIRS}
 )
 
 add_definitions(-DCPP_API_EXPORTS ${VISIBILITY_FLAGS}) # for controlling visibility
@@ -230,6 +229,8 @@ set(PYLUXCORE_SRCS
 add_library(pyluxcore MODULE ${PYLUXCORE_SRCS} ${LUXCORE_LIB_SRCS} ${LUX_PARSER_SRC})
 target_include_directories(pyluxcore
   PRIVATE
+  ${FMT_INCLUDE_DIR}
+  ${SPDLOG_INCLUDE_DIRS}
   ${Python_INCLUDE_DIRS}
   ${OPENSUBDIV_INCLUDE_DIRS}
   ${OPENVDB_INCLUDE_DIRS}
@@ -249,10 +250,7 @@ target_include_directories(pyluxcore
   ${PUGIXML_INCLUDE_DIRS}
   ${MINIZIPNG_INCLUDE_DIRS}
   ${OPENJPEG_INCLUDE_DIRS}
-  ${SPDLOG_INCLUDE_DIRS}
   ${IMATH_INCLUDE_DIRS}
-  ${SPDLOG_INCLUDE_DIRS}
-  ${FMT_INCLUDE_DIRS}
 )
 
 if(APPLE)
@@ -298,4 +296,3 @@ endif(MSVC)
 # Predefines
 #
 ################################################################################
-
