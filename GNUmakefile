@@ -106,6 +106,9 @@ all: .FORCE
 	@echo Build LuxCoreRender ...
 	make -C "$(BUILD_DIR)" -j $(NPROCS) VERBOSE=$(V)
 
+clean: .FORCE
+	make -C "$(BUILD_DIR)" -j $(NPROCS) clean
+
 deps: .FORCE
 	@echo
 	@echo Configuring dependencies in \"$(DEPS_BUILD_DIR)\", install to \"$(DEPS_INSTALL_DIR)\"
